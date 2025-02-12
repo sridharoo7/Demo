@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Model;
 
@@ -17,7 +16,7 @@ namespace Web_App.Controllers
             _logger = logger;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             try
@@ -28,6 +27,40 @@ namespace Web_App.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex,ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    ex.Message);
+            }
+        }
+
+        //Use Put since we are updating all the customer properties
+        [HttpPut("{id}")]
+        public IActionResult UpdateCustomer(int id, [FromBody]Customer customer)
+        {
+            try
+            {
+                var res = _customerService.UpdateCustomer(customer,id);
+                return res ? Ok("Updated") : NotFound($"Customer not exist with ID: {id}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    ex.Message);
+            }
+        }
+
+        //Use Patch since we are updating only the customer plan
+        [HttpPatch("{id}/{plan}")]
+        public IActionResult UpdateCustomerPlan(int id, string plan)
+        {
+            try
+            {
+                var res = _customerService.UpdateCustomerPlan(plan, id);
+                return res ? Ok("Updated") : NotFound($"Customer not exist with ID: {id}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     ex.Message);
             }
